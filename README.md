@@ -1,10 +1,15 @@
 # Scalatra Docker App #
 
+## Prerequisites ##
+
+  - SBT
+  - Docker
+
 ## Build & Run Docker image ##
 
 ```sh
 $ cd scalatra-docker
-$ ./sbt
+$ sbt
 > docker
 > ctrl+d
 $ docker run -ti -p 8080:80 -v $(pwd)/logs:/app/logs org.scalatra/scalatra-docker-app
@@ -14,7 +19,7 @@ $ docker run -ti -p 8080:80 -v $(pwd)/logs:/app/logs org.scalatra/scalatra-docke
 
 ```sh
 $ cd scalatra-docker
-$ ./sbt
+$ sbt
 > container:start
 > browse
 ```
