@@ -104,10 +104,12 @@ object ScalatraDockerBuild extends Build {
           // All all files from webapp
           webappFiles foreach { case (from, to) => add(from, to) }
 
-          // Define some mount points for persistent data (containers are immutable)
+          // Define some volumes for persistent data (containers are immutable)
           volume("/logs")
           volume("/conf")
           volume("/data")
+
+          expose(80)
 
           workDir("/app")
 
