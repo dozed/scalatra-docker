@@ -12,7 +12,11 @@ $ cd scalatra-docker
 $ sbt
 > docker
 > ctrl+d
-$ docker run -ti -p 8080:80 -v $(pwd)/logs:/app/logs org.scalatra/scalatra-docker-app
+$ docker run -ti \
+  -v $(pwd)/conf:/app/conf:ro \
+  -v $(pwd)/data:/app/data \
+  -e CONFIG_FILE=/app/conf/application.conf \
+  org.scalatra/scalatra-docker-app
 ```
 
 ## Develop ##

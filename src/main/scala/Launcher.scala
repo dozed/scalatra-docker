@@ -1,6 +1,7 @@
 import org.eclipse.jetty.server._
 import org.eclipse.jetty.server.handler.{HandlerCollection, RequestLogHandler}
 import org.eclipse.jetty.webapp.WebAppContext
+import org.scalatra.example.ApplicationConfig
 import org.scalatra.servlet.ScalatraListener
 import org.slf4j.LoggerFactory
 
@@ -20,6 +21,8 @@ object ScalatraLauncher extends App {
 
   def startServer: Unit = {
 
+    val appConfig = ApplicationConfig.read
+
     val log = LoggerFactory.getLogger("ScalatraLauncher")
 
     // create jetty server
@@ -32,12 +35,13 @@ object ScalatraLauncher extends App {
     config.setSendDateHeader(true)
 
     val connector = new ServerConnector(server, new HttpConnectionFactory(config))
-    connector.setPort(80)
+    connector.setHost(appConfig.webServer.host)
+    connector.setPort(appConfig.webServer.port)
     connector.setIdleTimeout(30000)
     server.addConnector(connector)
 
     // in development mode create a symlink from webapp to target/webapp
-    val webAppResourceBase = "webapp"
+    val webAppResourceBase = appConfig.webServer.webappDirectory
 
     // create web application context
     val webAppContext = new WebAppContext
@@ -48,7 +52,7 @@ object ScalatraLauncher extends App {
 
     // setup request logging (-> http://logback.qos.ch/access.html)
     val requestLog = new NCSARequestLog
-    requestLog.setFilename("logs/yyyy_mm_dd.request.log")
+    requestLog.setFilename(f"${appConfig.logDirectory}/jetty/yyyy_mm_dd.request.log")
     requestLog.setFilenameDateFormat("yyyy_MM_dd")
     requestLog.setRetainDays(90)
     requestLog.setAppend(true)

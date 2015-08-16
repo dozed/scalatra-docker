@@ -29,6 +29,7 @@ object ScalatraDockerBuild extends Build {
         "org.scalatra" %% "scalatra" % ScalatraVersion,
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,
         "org.scalatra" %% "scalatra-specs2" % ScalatraVersion % "test",
+        "net.ceedubs" %% "ficus" % "1.1.2",
         "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime",
         "org.eclipse.jetty" % "jetty-webapp" % "9.2.10.v20150310" % "compile;container",
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided"
@@ -48,6 +49,9 @@ object ScalatraDockerBuild extends Build {
       },
 
       exportJars := true,
+
+      // exclude application.conf from generated .jar
+      mappings in (Compile, packageBin) ~= { _.filterNot(_._1.getName == "application.conf") },
 
       docker <<= docker.dependsOn(prepareWebapp),
 
@@ -91,15 +95,14 @@ object ScalatraDockerBuild extends Build {
           runRaw("rm -rf /app/webapp/WEB-INF/classes")
 
           // Define some volumes for persistent data (containers are immutable)
-          volume("/logs")
-          volume("/conf")
-          volume("/data")
+          volume("/app/conf")
+          volume("/app/data")
 
           expose(80)
 
           workDir("/app")
 
-          entryPoint("java", "-cp", classpathString, mainclass)
+          cmdRaw("java -Dconfig.file=$CONFIG_FILE -cp " + classpathString + "  " + mainclass)
 
         }
 
