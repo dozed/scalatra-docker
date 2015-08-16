@@ -1,5 +1,3 @@
-import java.util.regex.Pattern
-
 import com.earldouglas.xwp.XwpPlugin._
 import com.mojolly.scalate.ScalatePlugin.ScalateKeys._
 import com.mojolly.scalate.ScalatePlugin._
@@ -9,7 +7,6 @@ import sbt._
 import sbtdocker.DockerKeys._
 import sbtdocker.DockerPlugin
 import sbtdocker.mutable.Dockerfile
-import Path.rebase
 
 object ScalatraDockerBuild extends Build {
   val Organization = "org.scalatra"
@@ -17,17 +14,6 @@ object ScalatraDockerBuild extends Build {
   val Version = "0.1.0-SNAPSHOT"
   val ScalaVersion = "2.11.6"
   val ScalatraVersion = "2.4.0-RC2-2"
-
-  private class PatternFileFilter(val pattern: Pattern) extends FileFilter {
-    def accept(file: File): Boolean = {
-      println(file.toString)
-      pattern.matcher(file.getCanonicalPath).matches
-    }
-  }
-
-  private object PatternFileFilter {
-    def apply(expression: String): PatternFileFilter = new PatternFileFilter(Pattern.compile(expression))
-  }
 
   lazy val project = Project (
     "scalatra-docker-app",
@@ -77,10 +63,6 @@ object ScalatraDockerBuild extends Build {
         // Make a colon separated classpath with the JAR file
         val classpathString = classpath.files.map("/app/lib/" + _.getName).mkString(":")
 
-        // exclude WEB-INF/(classes|lib) and all directories
-        val excludes = PatternFileFilter(".*/WEB-INF/classes") || PatternFileFilter(".*/WEB-INF/lib")
-        val webappFiles = PathFinder(webappDir).descendantsExcept(GlobFilter("*"), excludes).get.filterNot(_.isDirectory) pair rebase(webappDir, "/app/webapp")
-
         new Dockerfile {
 
           from("java")
@@ -102,7 +84,11 @@ object ScalatraDockerBuild extends Build {
           add(classpath.files, "/app/lib/")
 
           // All all files from webapp
-          webappFiles foreach { case (from, to) => add(from, to) }
+          add(webappDir, "/app/webapp")
+
+          // Remove lib and classes
+          runRaw("rm -rf /app/webapp/WEB-INF/lib")
+          runRaw("rm -rf /app/webapp/WEB-INF/classes")
 
           // Define some volumes for persistent data (containers are immutable)
           volume("/logs")
