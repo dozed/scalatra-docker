@@ -13,6 +13,7 @@ $ sbt
 > docker
 > ctrl+d
 $ docker run -ti \
+  -p 8080:80 \
   -v $(pwd)/conf:/app/conf:ro \
   -v $(pwd)/data:/app/data \
   -e CONFIG_FILE=/app/conf/application.conf \
