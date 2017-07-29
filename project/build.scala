@@ -1,11 +1,14 @@
-import com.earldouglas.xwp.XwpPlugin._
-import com.mojolly.scalate.ScalatePlugin.ScalateKeys._
-import com.mojolly.scalate.ScalatePlugin._
-import org.scalatra.sbt._
-import sbt.Keys._
 import sbt._
+import Keys._
+
+import com.earldouglas.xwp.JettyPlugin
+import com.earldouglas.xwp.WebappPlugin.autoImport._
+import org.scalatra.sbt._
+import com.mojolly.scalate._
+import com.mojolly.scalate.ScalatePlugin._
+import com.mojolly.scalate.ScalatePlugin.ScalateKeys._
 import sbtdocker.DockerKeys._
-import sbtdocker.DockerPlugin
+import sbtdocker._
 import sbtdocker.mutable.Dockerfile
 
 object ScalatraDockerBuild extends Build {
@@ -13,7 +16,7 @@ object ScalatraDockerBuild extends Build {
   val Name = "Scalatra Docker App"
   val Version = "0.1.0-SNAPSHOT"
   val ScalaVersion = "2.11.6"
-  val ScalatraVersion = "2.4.0-RC2-2"
+  val ScalatraVersion = "2.5.1"
 
   lazy val project = Project (
     "scalatra-docker-app",
@@ -31,7 +34,7 @@ object ScalatraDockerBuild extends Build {
         "org.scalatra" %% "scalatra-specs2" % ScalatraVersion % "test",
         "net.ceedubs" %% "ficus" % "1.1.2",
         "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime",
-        "org.eclipse.jetty" % "jetty-webapp" % "9.2.10.v20150310" % "compile;container",
+        "org.eclipse.jetty" % "jetty-webapp" % "9.4.6.v20170531",
         "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided"
       ),
 
@@ -50,17 +53,18 @@ object ScalatraDockerBuild extends Build {
 
       exportJars := true,
 
+      docker <<= docker.dependsOn(sbt.Keys.`package`),
+
       // exclude application.conf from generated .jar
       mappings in (Compile, packageBin) ~= { _.filterNot(_._1.getName == "application.conf") },
 
-      docker <<= docker.dependsOn(prepareWebapp),
 
       mainClass := Some("Launcher"),
 
       dockerfile in docker := {
 
         val classpath = (fullClasspath in Runtime).value
-        val webappDir = (webappDest in webapp).value
+        val webappDir = (target in webappPrepare).value
 
         val mainclass = mainClass.in(Compile, packageBin).value.getOrElse(sys.error("Expected exactly one main class"))
 
@@ -108,5 +112,5 @@ object ScalatraDockerBuild extends Build {
 
       }
     )
-  ).enablePlugins(DockerPlugin)
+  ).enablePlugins(JettyPlugin, DockerPlugin)
 }
