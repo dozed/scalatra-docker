@@ -1,46 +1,28 @@
 
 import org.scalatra.sbt._
-import com.mojolly.scalate._
-import com.mojolly.scalate.ScalatePlugin._
-import com.mojolly.scalate.ScalatePlugin.ScalateKeys._
 
 
 organization := "org.scalatra"
 name := "Scalatra Docker App"
 version := "0.1.0-SNAPSHOT"
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.3"
 
 resolvers += Classpaths.typesafeReleases
-resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
 
 val ScalatraVersion = "2.5.1"
 
 libraryDependencies ++= Seq(
   "org.scalatra" %% "scalatra" % ScalatraVersion,
-  "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,
   "org.scalatra" %% "scalatra-specs2" % ScalatraVersion % "test",
-  "net.ceedubs" %% "ficus" % "1.1.2",
+  "com.iheart" %% "ficus" % "1.4.1",
+  "com.lihaoyi" %% "scalatags" % "0.6.5",
   "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime",
+  "org.slf4j" % "slf4j-api" % "1.7.25" % "runtime",
   "org.eclipse.jetty" % "jetty-webapp" % "9.4.6.v20170531",
   "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided"
 )
 
-scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
-  Seq(
-    TemplateConfig(
-      base / "webapp" / "WEB-INF" / "templates",
-      Seq.empty,  /* default imports should be added here */
-      Seq(
-        Binding("context", "_root_.org.scalatra.scalate.ScalatraRenderContext", importMembers = true, isImplicit = true)
-      ),  /* add extra bindings here */
-      Some("templates")
-    )
-  )
-}
-
 ScalatraPlugin.scalatraSettings
-
-scalateSettings
 
 enablePlugins(JettyPlugin, DockerPlugin)
 

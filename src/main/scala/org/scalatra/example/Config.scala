@@ -6,26 +6,26 @@ import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ValueReader
 
 case class ApplicationConfig(
-                              instanceName: String,
-                              environment: AppEnvironment,
-                              dataDirectory: String,
-                              confDirectory: String,
-                              webServer: ServerConfig
-                            ) {
+  instanceName: String,
+  environment: AppEnvironment,
+  dataDirectory: String,
+  confDirectory: String,
+  webServer: ServerConfig
+) {
 
   val isProduction = environment.isProduction
 
   val isDevelopment = environment.isDevelopment
 
-  val workingDirectory: String = f"$dataDirectory/tmp"
+  val workingDirectory: String = s"$dataDirectory/tmp"
 
-  val logDirectory: String = f"$dataDirectory/logs"
+  val logDirectory: String = s"$dataDirectory/logs"
 
   // file containing a log of all successful updates (database, filesystem, configuration, ...)
-  val updateLog: String = f"$dataDirectory/update.log"
+  val updateLog: String = s"$dataDirectory/update.log"
 
   // tempates can be found here
-  val templateSourceDirectory = f"${webServer.webappDirectory}/WEB-INF/templates/views"
+  val templateSourceDirectory = s"${webServer.webappDirectory}/WEB-INF/templates/views"
 
 }
 
