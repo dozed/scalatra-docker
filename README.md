@@ -25,6 +25,7 @@ $ docker run -ti \
 ```sh
 $ cd scalatra-docker
 $ sbt
-> container:start
+> jetty:start
 > browse
+> jetty:stop
 ```
